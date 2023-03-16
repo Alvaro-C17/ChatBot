@@ -1,10 +1,15 @@
 import discord
 import responses
-
+import os
+from currency import convert_currency
 
 async def send_message(message, user_message, is_private):
     try:
-        response = responses.get_response(user_message)
+        if "convert" in user_message:
+            currency_from, amount, currency_to = user_message.split()[1:]
+            response = convert_currency(currency_from, amount, currency_to)
+        else:
+            response = responses.get_response(user_message)
         await message.author.send(response) if is_private else await message.channel.send(response)
 
     except Exception as e:
@@ -12,7 +17,7 @@ async def send_message(message, user_message, is_private):
 
 
 def run_discord_bot():
-    TOKEN = 'MTA4MzU1NTk5NzQ1NDQzNDQwNg.G8CLAe.nIZULxtQUIWPcw_eJLSFp17F_woSgSBN3i6AcQ'
+    TOKEN = os.getenv('BOT_TOKEN')
     intents = discord.Intents.default()
     intents.message_content = True
     client = discord.Client(intents=intents)
@@ -39,3 +44,4 @@ def run_discord_bot():
             await send_message(message, user_message, is_private=False)
 
     client.run(TOKEN)
+
